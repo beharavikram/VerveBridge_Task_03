@@ -1,0 +1,181 @@
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+// Bus model class
+class Bus {
+    private String busNumber;
+    private String destination;
+    private int availableSeats;
+
+    public Bus(String busNumber, String destination, int availableSeats) {
+        this.busNumber = busNumber;
+        this.destination = destination;
+        this.availableSeats = availableSeats;
+    }
+
+    public String getBusNumber() {
+        return busNumber;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public int getAvailableSeats() {
+        return availableSeats;
+    }
+
+    public void bookSeat() {
+        if (availableSeats > 0) {
+            availableSeats--;
+        }
+    }
+
+    public void cancelSeat() {
+        availableSeats++;
+    }
+
+    @Override
+    public String toString() {
+        return "Bus Number: " + busNumber + ", Destination: " + destination + ", Available Seats: " + availableSeats;
+    }
+}
+
+// Booking model class
+class Booking {
+    private String busNumber;
+    private Date bookingDate;
+
+    public Booking(String busNumber, Date bookingDate) {
+        this.busNumber = busNumber;
+        this.bookingDate = bookingDate;
+    }
+
+    public String getBusNumber() {
+        return busNumber;
+    }
+
+    public Date getBookingDate() {
+        return bookingDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Bus Number: " + busNumber + ", Booking Date: " + bookingDate;
+    }
+}
+
+// Bus booking service class
+class BusBookingService {
+    private Map<String, Bus> busMap;
+    private List<Booking> bookingHistory;
+
+    public BusBookingService() {
+        busMap = new HashMap<>();
+        bookingHistory = new ArrayList<>();
+        // Example data
+        busMap.put("A1", new Bus("A1", "City Center", 10));
+        busMap.put("B2", new Bus("B2", "Downtown", 5));
+    }
+
+    public void searchBus(String busNumber) {
+        Bus bus = busMap.get(busNumber);
+        if (bus != null) {
+            System.out.println(bus);
+        } else {
+            System.out.println("Bus not found.");
+        }
+    }
+
+    public void bookTicket(String busNumber) {
+        Bus bus = busMap.get(busNumber);
+        if (bus != null && bus.getAvailableSeats() > 0) {
+            bus.bookSeat();
+            bookingHistory.add(new Booking(busNumber, new Date()));
+            System.out.println("Ticket booked successfully.");
+        } else {
+            System.out.println("No available seats or bus not found.");
+        }
+    }
+
+    public void cancelTicket(String busNumber) {
+        Bus bus = busMap.get(busNumber);
+        if (bus != null) {
+            bus.cancelSeat();
+            bookingHistory.removeIf(b -> b.getBusNumber().equals(busNumber) && b.getBookingDate() != null);
+            System.out.println("Ticket canceled successfully.");
+        } else {
+            System.out.println("Bus not found.");
+        }
+    }
+
+    public void viewBookingHistory() {
+        if (bookingHistory.isEmpty()) {
+            System.out.println("No booking history.");
+        } else {
+            for (Booking booking : bookingHistory) {
+                System.out.println(booking);
+            }
+        }
+    }
+
+    public void notify(String message) {
+        System.out.println("Notification: " + message);
+    }
+}
+
+// Main application class
+public class BusBookingApp {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        BusBookingService service = new BusBookingService();
+
+        while (true) {
+            System.out.println("1. Search Bus");
+            System.out.println("2. Book Ticket");
+            System.out.println("3. Cancel Ticket");
+            System.out.println("4. View Booking History");
+            System.out.println("5. Notification");
+            System.out.println("6. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter bus number to search: ");
+                    String searchBusNumber = scanner.nextLine();
+                    service.searchBus(searchBusNumber);
+                    break;
+                case 2:
+                    System.out.print("Enter bus number to book: ");
+                    String bookBusNumber = scanner.nextLine();
+                    service.bookTicket(bookBusNumber);
+                    break;
+                case 3:
+                    System.out.print("Enter bus number to cancel: ");
+                    String cancelBusNumber = scanner.nextLine();
+                    service.cancelTicket(cancelBusNumber);
+                    break;
+                case 4:
+                    service.viewBookingHistory();
+                    break;
+                case 5:
+                    System.out.print("Enter notification message: ");
+                    String message = scanner.nextLine();
+                    service.notify(message);
+                    break;
+                case 6:
+                    System.out.println("Exiting...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
